@@ -21,7 +21,7 @@ type Shop struct {
     Close       string              `bson:"close" json:"close"`
 }
 
-type Stock struct {s
+type Stock struct {
     Product     primitive.ObjectID  `bson:"product" json:"product"`
     Quantity    int                 `bson:"quantity" json:"quantity"`
 }

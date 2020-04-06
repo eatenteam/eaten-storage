@@ -3,6 +3,7 @@ package main
 import (
     "net/http"
 
+    cors        "github.com/rs/cors"
     mongo       "go.mongodb.org/mongo-driver/mongo"
     httprouter  "github.com/julienschmidt/httprouter"
 )
@@ -19,5 +20,12 @@ func newServer(db *mongo.Client, router *httprouter.Router) *Server {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    s.router.ServeHTTP(w, r)
+    am := []string{
+        http.MethodGet,
+        http.MethodPost,
+        http.MethodPut,
+        http.MethodDelete,
+    }
+    c := cors.New(cors.Options{ AllowedMethods: am })
+    c.ServeHTTP(w, r, s.router.ServeHTTP)
 }
