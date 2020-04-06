@@ -16,12 +16,12 @@ type Shop struct {
     Brand       string              `bson:"brand" json:"brand"`
     Tel         string              `bson:"tel" json:"tel"`
     Location    Location            `bson:"location" json:"location"`
-    Stock       []Stock               `bson:"stock,omitempty" json:"stock"`
+    Stock       []Stock             `bson:"stock,omitempty" json:"stock"`
     Open        string              `bson:"open" json:"open"`
     Close       string              `bson:"close" json:"close"`
 }
 
-type Stock struct {
+type Stock struct {s
     Product     primitive.ObjectID  `bson:"product" json:"product"`
     Quantity    int                 `bson:"quantity" json:"quantity"`
 }
