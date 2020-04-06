@@ -11,26 +11,40 @@ import (
     options     "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Mall struct {
-    Id      primitive.ObjectID      `bson:"_id,omitempty" json:"id"`
-    Brand   string                  `bson:"brand" json:"brand"`
-    Shops   []primitive.ObjectID    `bson:"shops,omitempty"json:"shops"`
+type Shop struct {
+    Id          primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
+    Brand       string              `bson:"brand" json:"brand"`
+    Tel         string              `bson:"tel" json:"tel"`
+    Location    Location            `bson:"location" json:"location"`
+    Stock       []Stock               `bson:"stock,omitempty" json:"stock"`
+    Open        string              `bson:"open" json:"open"`
+    Close       string              `bson:"close" json:"close"`
 }
 
-func (s *Server) handleMallsGet() httprouter.Handle {
-    collection := s.db.Database("storage").Collection("malls")
+type Stock struct {
+    Product     primitive.ObjectID  `bson:"product" json:"product"`
+    Quantity    int                 `bson:"quantity" json:"quantity"`
+}
+
+type Location struct {
+    Mall        primitive.ObjectID  `bson:"mall,omitempty" json:"mall"`
+    Address     string              `bson:"addr,omitempty json:"addr"`
+}
+
+func (s *Server) handleShopsGet() httprouter.Handle {
+    collection := s.db.Database("storage").Collection("shops")
     findOptions := options.Find()
     filter := bson.M{}
     return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-        var results []*Mall
+        var results []*Shop
         cur, err := collection.Find(context.TODO(), filter, findOptions)
         if err != nil {
-            respondErr(w, r, http.StatusInternalServerError, err)
+            respondErr(w, r, http.StatusInternalServerError, "failed to find documents")
             return
         }
         defer cur.Close(context.TODO())
         for cur.Next(context.TODO()) {
-            var elem Mall
+            var elem Shop
             err := cur.Decode(&elem)
             if err != nil {
                 respondErr(w, r, http.StatusInternalServerError, err)
@@ -40,17 +54,16 @@ func (s *Server) handleMallsGet() httprouter.Handle {
         }
         if err := cur.Err(); err != nil {
             respondErr(w, r, http.StatusInternalServerError, err)
-            return
         }
         respond(w, r, http.StatusOK, &results)
     }
 }
 
-func (s *Server) handleMallsGetId() httprouter.Handle {
-    collection := s.db.Database("storage").Collection("malls")
+func (s *Server) handleShopsGetId() httprouter.Handle {
+    collection := s.db.Database("storage").Collection("shops")
     findOptions := options.FindOne()
     return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-        var result Mall
+        var result Shop
         filter := bson.M{"_id": r.Context().Value("id")}
         err := collection.FindOne(context.TODO(), filter, findOptions).Decode(&result)
         if err != nil {
@@ -58,23 +71,23 @@ func (s *Server) handleMallsGetId() httprouter.Handle {
                 respondErr(w, r, http.StatusNotFound, err)
                 return
             }
-            respondErr(w, r, http.StatusInternalServerError, "failed to find a document from the database")
+            respondErr(w, r, http.StatusInternalServerError, "failed to find document from the database")
             return
         }
         respond(w, r, http.StatusOK, &result)
     }
 }
 
-func (s *Server) handleMallsPost() httprouter.Handle {
-    collection := s.db.Database("storage").Collection("malls")
+func (s *Server) handleShopsPost() httprouter.Handle {
+    collection := s.db.Database("storage").Collection("shops")
     insertOptions := options.InsertOne()
     return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-        var mall Mall
-        if err := decodeBody(r, &mall); err != nil {
-            respondErr(w, r, http.StatusBadRequest, "failed to read mall from request")
+        var shop Shop
+        if err := decodeBody(r, &shop); err != nil {
+            respondErr(w, r, http.StatusBadRequest, "failed to read shop from request")
             return
         }
-        result, err := collection.InsertOne(context.TODO(), mall, insertOptions)
+        result, err := collection.InsertOne(context.TODO(), shop, insertOptions)
         if err != nil {
             respondErr(w, r, http.StatusInternalServerError, "failed to insert document into the database")
             return
@@ -83,17 +96,17 @@ func (s *Server) handleMallsPost() httprouter.Handle {
     }
 }
 
-func (s *Server) handleMallsPutId() httprouter.Handle {
-    collection := s.db.Database("storage").Collection("malls")
+func (s *Server) handleShopsPutId() httprouter.Handle {
+    collection := s.db.Database("storage").Collection("shops")
     updateOptions := options.FindOneAndReplace()
     return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-        var mall, result Mall
+        var shop, result Shop
         filter := bson.M{"_id": r.Context().Value("id")}
-        if err := decodeBody(r, &mall); err != nil {
-            respondErr(w, r, http.StatusBadRequest, "failed to read mall from request")
+        if err := decodeBody(r, &shop); err != nil {
+            respondErr(w, r, http.StatusBadRequest, "failed to read shop from request")
             return
         }
-        err := collection.FindOneAndReplace(context.TODO(), filter, mall, updateOptions).Decode(&result)
+        err := collection.FindOneAndReplace(context.TODO(), filter, shop, updateOptions).Decode(&result)
         if err != nil {
             if err == mongo.ErrNoDocuments {
                 respondErr(w, r, http.StatusNotFound, err)
@@ -106,11 +119,11 @@ func (s *Server) handleMallsPutId() httprouter.Handle {
     }
 }
 
-func (s *Server) handleMallsDeleteId() httprouter.Handle {
-    collection := s.db.Database("storage").Collection("malls")
+func (s *Server) handleShopsDeleteId() httprouter.Handle {
+    collection := s.db.Database("storage").Collection("shops")
     deleteOptions := options.FindOneAndDelete()
     return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-        var result Mall
+        var result Shop
         filter := bson.M{"_id": r.Context().Value("id")}
         err := collection.FindOneAndDelete(context.TODO(), filter, deleteOptions).Decode(&result)
         if err != nil {
