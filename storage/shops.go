@@ -14,7 +14,8 @@ import (
 type Shop struct {
     Id          primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
     Brand       string              `bson:"brand" json:"brand"`
-    Tel         string              `bson:"tel" json:"tel"`
+    Promo       string              `bson:"promo,omitempty" json:"promo"`
+    Description string              `bson:"description,omitempty" json:"description"`
     Location    Location            `bson:"location" json:"location"`
     Stock       []Stock             `bson:"stock,omitempty" json:"stock"`
     Open        string              `bson:"open" json:"open"`

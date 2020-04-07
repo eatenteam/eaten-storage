@@ -12,9 +12,10 @@ import (
 )
 
 type Mall struct {
-    Id      primitive.ObjectID      `bson:"_id,omitempty" json:"id"`
-    Brand   string                  `bson:"brand" json:"brand"`
-    Shops   []primitive.ObjectID    `bson:"shops,omitempty"json:"shops"`
+    Id          primitive.ObjectID      `bson:"_id,omitempty" json:"id"`
+    Brand       string                  `bson:"brand" json:"brand"`
+    Description string                  `bson:"description,omitempty" json:"description"`
+    Shops       []primitive.ObjectID    `bson:"shops,omitempty"json:"shops"`
 }
 
 func (s *Server) handleMallsGet() httprouter.Handle {

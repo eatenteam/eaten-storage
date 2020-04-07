@@ -12,9 +12,10 @@ import (
 )
 
 type Product struct {
-    Id          primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
-    Name        string              `bson:"name" json:"name"`
-    Price       int                 `bson:"price" json:"price"`
+    Id              primitive.ObjectID  `bson:"_id,omitempty" json:"id"`
+    Name            string              `bson:"name" json:"name"`
+    OriginalPrice   int                 `bson:"ori_price" json:"ori_price"`
+    PromotionPrice  int                 `bson:"pro_price" json:"pro_price"`
 }
 
 func (s *Server) handleProductsGet() httprouter.Handle {
